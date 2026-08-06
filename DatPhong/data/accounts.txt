@@ -1,0 +1,3 @@
+admin,e86f78a8a3caf0b60d8e74e5942aa6d86dc150cd3c03338aef25b7d2d7e3acc7,admin@eduroom.edu.vn,ADMIN
+SV099,0b2e10f7347e039bb88aa3d2014e11b7b8718b2d0af66e66f8ffd2a0cf68ee3a,khai030899@gmail.com,HOCVIEN
+SVTEST01,d9b5f58f0b38198293971865a14074f59eba3e82595becbe86ae51f1d9f1f65e,test@edu.vn,HOCVIEN

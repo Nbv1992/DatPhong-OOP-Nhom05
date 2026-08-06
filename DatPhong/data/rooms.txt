@@ -1,0 +1,8 @@
+# roomId,roomName,floor,maxCapacity,roomType,status
+P101,Phòng học nhóm 101,1,10,Phòng thường,Đang hoạt động
+P102,Phòng học nhóm 102,1,8,Phòng thường,Đang hoạt động
+P103,Phòng học nhóm 103,1,6,Phòng thường,Đang bảo trì
+P201,Phòng chiếu 201,2,15,Phòng có máy chiếu,Đang hoạt động
+P202,Phòng chiếu 202,2,20,Phòng có máy chiếu,Đang hoạt động
+P301,Phòng seminar A,3,30,Phòng họp seminar,Đang hoạt động
+P302,Phòng seminar B,3,50,Phòng họp seminar,Đang hoạt động

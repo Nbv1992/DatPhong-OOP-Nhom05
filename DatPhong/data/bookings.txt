@@ -1,0 +1,2 @@
+# bookingId,studentId,roomId,startTime,endTime,numberOfPeople,purpose,status,fee
+BP-20260806103541-002,SV099,P101,2026-08-06T10:39,2026-08-06T11:35,5,123,Đã đặt,0.0
