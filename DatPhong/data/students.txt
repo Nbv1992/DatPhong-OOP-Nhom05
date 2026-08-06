@@ -1,0 +1,8 @@
+# studentId,fullName,phone,email,className
+SV001,Nguyen Van An,0901234567,an.nguyen@student.edu.vn,CNTT01
+SV002,Tran Thi Binh,0912345678,binh.tran@student.edu.vn,CNTT01
+SV003,Le Hoang Nam,0923456789,nam.le@student.edu.vn,CNTT02
+SV004,Pham Minh Duc,0934567890,duc.pham@student.edu.vn,KTPM01
+SV005,Hoang Thi Lan,0945678901,lan.hoang@student.edu.vn,KTPM01
+SV099,NGUYEN VAN KHAI,0702750320,khai030899@gmail.com,CNTT01
+SVTEST01,Test User,0912345678,test@edu.vn,CNTT01
