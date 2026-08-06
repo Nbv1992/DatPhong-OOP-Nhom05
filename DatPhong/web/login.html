@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduRoom – Đăng nhập</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #6c63ff;
+      --primary-d: #5548e0;
+      --green:   #43d477;
+      --red:     #f45d5d;
+      --bg:      #0f0f1a;
+      --bg2:     #16162a;
+      --border:  rgba(255,255,255,0.10);
+      --text:    #e2e8f0;
+      --muted:   #8892a4;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ---- Animated background ---- */
+    .bg-animated {
+      position: fixed; inset: 0; z-index: 0;
+      background: linear-gradient(135deg, #0f0f1a 0%, #1a1040 50%, #0f1a2a 100%);
+      overflow: hidden;
+    }
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); opacity: .35; animation: float 8s ease-in-out infinite;
+    }
+    .orb1 { width:500px; height:500px; background:#6c63ff; top:-100px; left:-100px; animation-delay:0s; }
+    .orb2 { width:400px; height:400px; background:#3b9eff; bottom:-80px; right:-80px; animation-delay:-3s; }
+    .orb3 { width:300px; height:300px; background:#a78bfa; top:40%; left:60%; animation-delay:-5s; }
+
+    @keyframes float {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(30px,-20px) scale(1.05); }
+      66%      { transform: translate(-20px,15px) scale(0.97); }
+    }
+
+    /* Particle dots */
+    .particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
+    .particle {
+      position:absolute; width:3px; height:3px; border-radius:50%;
+      background:rgba(255,255,255,.3); animation: twinkle 4s ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%,100% { opacity:.15; transform:scale(1); }
+      50%      { opacity:.8;  transform:scale(1.5); }
+    }
+
+    /* ---- Card ---- */
+    .card {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 440px;
+      background: rgba(22,22,42,0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px 36px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.6), 0 0 0 1px rgba(108,99,255,.1);
+      animation: slideUp .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform:translateY(40px) scale(.96); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    /* ---- Logo ---- */
+    .logo { text-align:center; margin-bottom:32px; }
+    .logo-icon {
+      width:64px; height:64px; border-radius:18px; margin:0 auto 14px;
+      background: linear-gradient(135deg, #6c63ff, #a78bfa);
+      display:flex; align-items:center; justify-content:center;
+      font-size:28px; color:#fff;
+      box-shadow: 0 8px 24px rgba(108,99,255,.5);
+      animation: pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 8px 24px rgba(108,99,255,.5); }
+      50%      { box-shadow: 0 8px 40px rgba(108,99,255,.8); }
+    }
+    .logo h1 { font-size:24px; font-weight:800; letter-spacing:-.3px; }
+    .logo p  { font-size:13px; color:var(--muted); margin-top:4px; }
+
+    /* ---- Tabs ---- */
+    .tabs {
+      display:flex; background:rgba(255,255,255,.05);
+      border-radius:12px; padding:4px; margin-bottom:28px; gap:4px;
+    }
+    .tab {
+      flex:1; padding:9px; border:none; border-radius:9px;
+      font-size:13px; font-weight:600; cursor:pointer;
+      background:transparent; color:var(--muted);
+      transition:all .2s;
+    }
+    .tab.active {
+      background: linear-gradient(135deg,#6c63ff,#a78bfa);
+      color:#fff;
+      box-shadow: 0 4px 12px rgba(108,99,255,.4);
+    }
+
+    /* ---- Panels ---- */
+    .panel { display:none; animation: fadeIn .25s ease; }
+    .panel.active { display:block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ---- Form ---- */
+    .form-group { margin-bottom:18px; }
+    .form-group label {
+      display:flex; align-items:center; gap:6px;
+      font-size:12px; font-weight:600; color:var(--muted);
+      margin-bottom:7px; text-transform:uppercase; letter-spacing:.4px;
+    }
+    .input-wrap { position:relative; }
+    .input-wrap i.icon {
+      position:absolute; left:14px; top:50%; transform:translateY(-50%);
+      color:var(--muted); font-size:14px; pointer-events:none;
+    }
+    .input-wrap input {
+      width:100%; padding:12px 14px 12px 40px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      border-radius:12px; color:var(--text);
+      font-size:14px; outline:none;
+      transition:border-color .2s, box-shadow .2s, background .2s;
+    }
+    .input-wrap input:focus {
+      border-color: var(--primary);
+      background: rgba(108,99,255,.08);
+      box-shadow: 0 0 0 3px rgba(108,99,255,.2);
+    }
+    .input-wrap .toggle-pw {
+      position:absolute; right:14px; top:50%; transform:translateY(-50%);
+      background:none; border:none; color:var(--muted);
+      cursor:pointer; font-size:14px; transition:color .2s;
+    }
+    .input-wrap .toggle-pw:hover { color:var(--text); }
+
+    /* ---- 2-col grid for register ---- */
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+    /* ---- Button ---- */
+    .btn-submit {
+      width:100%; padding:14px;
+      background: linear-gradient(135deg,#6c63ff,#a78bfa);
+      border:none; border-radius:12px;
+      color:#fff; font-size:15px; font-weight:700;
+      cursor:pointer; margin-top:6px;
+      box-shadow: 0 6px 20px rgba(108,99,255,.4);
+      transition:transform .2s, box-shadow .2s;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .btn-submit:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(108,99,255,.55); }
+    .btn-submit:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+
+    /* ---- Alert ---- */
+    .alert {
+      display:none; padding:12px 14px; border-radius:10px;
+      font-size:13px; margin-bottom:16px;
+      display:flex; align-items:flex-start; gap:10px;
+    }
+    .alert.hidden { display:none !important; }
+    .alert-error   { background:rgba(244,93,93,.12);  border:1px solid rgba(244,93,93,.3);  color:#f97b7b; }
+    .alert-success { background:rgba(67,212,119,.12); border:1px solid rgba(67,212,119,.3); color:#43d477; }
+
+    /* ---- Link ---- */
+    .link-btn {
+      background:none; border:none; color:var(--primary);
+      cursor:pointer; font-size:13px; text-decoration:underline;
+      padding:0; transition:color .2s;
+    }
+    .link-btn:hover { color:#a78bfa; }
+    .text-center { text-align:center; margin-top:14px; color:var(--muted); font-size:13px; }
+
+    /* ---- Password strength ---- */
+    .pw-strength { margin-top:8px; }
+    .pw-bar { height:4px; border-radius:2px; background:rgba(255,255,255,.1); overflow:hidden; }
+    .pw-bar-fill { height:100%; width:0; border-radius:2px; transition:width .3s, background .3s; }
+    .pw-label { font-size:11px; color:var(--muted); margin-top:4px; }
+
+    /* ---- Divider ---- */
+    .divider {
+      display:flex; align-items:center; gap:12px;
+      color:var(--muted); font-size:12px; margin:16px 0;
+    }
+    .divider::before,.divider::after {
+      content:''; flex:1; height:1px; background:var(--border);
+    }
+
+    /* ---- Footer ---- */
+    .card-footer {
+      text-align:center; margin-top:24px;
+      font-size:12px; color:var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated background -->
+  <div class="bg-animated">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+  <div class="particles" id="particles"></div>
+
+  <!-- Card -->
+  <div class="card">
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-icon"><i class="fas fa-building"></i></div>
+      <h1>EduRoom</h1>
+      <p>Hệ thống đặt phòng học nhóm – Nhóm 05</p>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert hidden" id="alertBox">
+      <i class="fas fa-circle-xmark" id="alertIcon"></i>
+      <span id="alertMsg"></span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="tabs">
+      <button class="tab active" onclick="switchTab('login')">
+        <i class="fas fa-right-to-bracket"></i> Đăng nhập
+      </button>
+      <button class="tab" onclick="switchTab('register')">
+        <i class="fas fa-user-plus"></i> Đăng ký
+      </button>
+      <button class="tab" onclick="switchTab('forgot')">
+        <i class="fas fa-key"></i> Quên mật khẩu
+      </button>
+    </div>
+
+    <!-- ======== LOGIN ======== -->
+    <div class="panel active" id="panel-login">
+      <form onsubmit="doLogin(event)">
+        <div class="form-group">
+          <label><i class="fas fa-id-card"></i> Mã sinh viên</label>
+          <div class="input-wrap">
+            <i class="fas fa-id-card icon"></i>
+            <input type="text" id="l_id" placeholder="VD: SV001" autocomplete="username" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Mật khẩu</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock icon"></i>
+            <input type="password" id="l_pw" placeholder="Nhập mật khẩu" autocomplete="current-password" required />
+            <button type="button" class="toggle-pw" onclick="togglePw('l_pw',this)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit" id="btnLogin">
+          <i class="fas fa-right-to-bracket"></i> Đăng nhập
+        </button>
+      </form>
+      <div class="text-center">
+        Chưa có tài khoản? <button class="link-btn" onclick="switchTab('register')">Đăng ký ngay</button>
+      </div>
+    </div>
+
+    <!-- ======== REGISTER ======== -->
+    <div class="panel" id="panel-register">
+      <form onsubmit="doRegister(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-id-card"></i> Mã sinh viên</label>
+            <div class="input-wrap">
+              <i class="fas fa-id-card icon"></i>
+              <input type="text" id="r_id" placeholder="VD: SV006" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-chalkboard"></i> Lớp</label>
+            <div class="input-wrap">
+              <i class="fas fa-chalkboard icon"></i>
+              <input type="text" id="r_class" placeholder="VD: CNTT01" required />
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Họ và tên</label>
+          <div class="input-wrap">
+            <i class="fas fa-user icon"></i>
+            <input type="text" id="r_name" placeholder="Nguyễn Văn A" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> Số điện thoại</label>
+            <div class="input-wrap">
+              <i class="fas fa-phone icon"></i>
+              <input type="tel" id="r_phone" placeholder="0912345678" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email</label>
+            <div class="input-wrap">
+              <i class="fas fa-envelope icon"></i>
+              <input type="email" id="r_email" placeholder="sv@edu.vn" required />
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Mật khẩu</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock icon"></i>
+            <input type="password" id="r_pw" placeholder="Tối thiểu 6 ký tự"
+                   oninput="checkStrength(this.value)" required />
+            <button type="button" class="toggle-pw" onclick="togglePw('r_pw',this)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="pw-strength">
+            <div class="pw-bar"><div class="pw-bar-fill" id="pwBar"></div></div>
+            <div class="pw-label" id="pwLabel">Nhập mật khẩu để kiểm tra độ mạnh</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Xác nhận mật khẩu</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock icon"></i>
+            <input type="password" id="r_pw2" placeholder="Nhập lại mật khẩu" required />
+          </div>
+        </div>
+        <button type="submit" class="btn-submit" id="btnRegister">
+          <i class="fas fa-user-plus"></i> Tạo tài khoản
+        </button>
+      </form>
+      <div class="text-center">
+        Đã có tài khoản? <button class="link-btn" onclick="switchTab('login')">Đăng nhập</button>
+      </div>
+    </div>
+
+    <!-- ======== FORGOT PASSWORD ======== -->
+    <div class="panel" id="panel-forgot">
+      <form onsubmit="doReset(event)">
+        <div class="form-group">
+          <label><i class="fas fa-id-card"></i> Mã sinh viên</label>
+          <div class="input-wrap">
+            <i class="fas fa-id-card icon"></i>
+            <input type="text" id="f_id" placeholder="VD: SV001" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Email đã đăng ký</label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope icon"></i>
+            <input type="email" id="f_email" placeholder="sv@edu.vn" required />
+          </div>
+        </div>
+        <div class="divider">Mật khẩu mới</div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Mật khẩu mới</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock icon"></i>
+            <input type="password" id="f_pw" placeholder="Tối thiểu 6 ký tự" required />
+            <button type="button" class="toggle-pw" onclick="togglePw('f_pw',this)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Xác nhận mật khẩu mới</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock icon"></i>
+            <input type="password" id="f_pw2" placeholder="Nhập lại mật khẩu mới" required />
+          </div>
+        </div>
+        <button type="submit" class="btn-submit" id="btnReset">
+          <i class="fas fa-key"></i> Đặt lại mật khẩu
+        </button>
+      </form>
+      <div class="text-center">
+        Nhớ mật khẩu rồi? <button class="link-btn" onclick="switchTab('login')">Đăng nhập</button>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <i class="fas fa-shield-halved"></i> Mật khẩu được mã hóa SHA-256 &nbsp;·&nbsp; EduRoom v1.0
+    </div>
+  </div>
+
+<script>
+const API = `${location.protocol}//${location.hostname}:8080/api`;
+
+// ---- Particles ----
+(function spawnParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      animation-delay:${Math.random()*4}s;
+      animation-duration:${3+Math.random()*4}s;
+      width:${1+Math.random()*3}px;
+      height:${1+Math.random()*3}px;
+      opacity:${.1+Math.random()*.4};
+    `;
+    container.appendChild(p);
+  }
+})();
+
+// ---- Tab switch ----
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  const tabs = ['login','register','forgot'];
+  document.querySelectorAll('.tab')[tabs.indexOf(tab)].classList.add('active');
+  hideAlert();
+}
+
+// ---- Alert ----
+function showAlert(msg, type = 'error') {
+  const box = document.getElementById('alertBox');
+  const icon = document.getElementById('alertIcon');
+  document.getElementById('alertMsg').textContent = msg;
+  box.className = `alert alert-${type}`;
+  icon.className = type === 'error' ? 'fas fa-circle-xmark' : 'fas fa-circle-check';
+  box.style.display = 'flex';
+}
+function hideAlert() {
+  document.getElementById('alertBox').classList.add('hidden');
+  document.getElementById('alertBox').style.display = 'none';
+}
+
+// ---- Toggle password visibility ----
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  const showing = inp.type === 'text';
+  inp.type = showing ? 'password' : 'text';
+  btn.innerHTML = showing ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+}
+
+// ---- Password strength ----
+function checkStrength(pw) {
+  const bar   = document.getElementById('pwBar');
+  const label = document.getElementById('pwLabel');
+  let score = 0;
+  if (pw.length >= 6)  score++;
+  if (pw.length >= 10) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/\d/.test(pw))    score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const levels = [
+    { pct:'0%',   bg:'transparent', text:'' },
+    { pct:'25%',  bg:'#f45d5d',     text:'Rất yếu' },
+    { pct:'50%',  bg:'#f7a641',     text:'Yếu' },
+    { pct:'70%',  bg:'#3b9eff',     text:'Trung bình' },
+    { pct:'90%',  bg:'#43d477',     text:'Mạnh' },
+    { pct:'100%', bg:'#43d477',     text:'Rất mạnh ✓' },
+  ];
+  const lv = levels[Math.min(score, 5)];
+  bar.style.width      = lv.pct;
+  bar.style.background = lv.bg;
+  label.textContent    = lv.text;
+  label.style.color    = lv.bg;
+}
+
+// ---- Login ----
+async function doLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnLogin');
+  const id  = document.getElementById('l_id').value.trim();
+  const pw  = document.getElementById('l_pw').value;
+  hideAlert();
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đăng nhập...';
+
+  try {
+    const res = await fetch(`${API}/auth/login`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ studentId: id, password: pw })
+    });
+    const data = await res.json();
+    if (data.success) {
+      // Lưu session vào localStorage
+      localStorage.setItem('eduroom_session', JSON.stringify({
+        studentId:   data.data.studentId,
+        role:        data.data.role,
+        email:       data.data.email,
+        displayName: data.data.displayName || data.data.studentId,
+        student:     data.data.student,
+        loginTime:   new Date().toISOString()
+      }));
+      showAlert('Đăng nhập thành công! Đang chuyển hướng...', 'success');
+      setTimeout(() => { window.location.href = '/index.html'; }, 800);
+    } else {
+      showAlert(data.message);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Đăng nhập';
+    }
+  } catch {
+    showAlert('Không thể kết nối server. Đảm bảo Java server đang chạy.');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Đăng nhập';
+  }
+}
+
+// ---- Register ----
+async function doRegister(e) {
+  e.preventDefault();
+  hideAlert();
+  const pw  = document.getElementById('r_pw').value;
+  const pw2 = document.getElementById('r_pw2').value;
+  if (pw !== pw2) { showAlert('Mật khẩu xác nhận không khớp.'); return; }
+  if (pw.length < 6) { showAlert('Mật khẩu phải có ít nhất 6 ký tự.'); return; }
+
+  const btn = document.getElementById('btnRegister');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đăng ký...';
+
+  try {
+    const res = await fetch(`${API}/auth/register`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        studentId: document.getElementById('r_id').value.trim(),
+        fullName:  document.getElementById('r_name').value.trim(),
+        phone:     document.getElementById('r_phone').value.trim(),
+        email:     document.getElementById('r_email').value.trim(),
+        className: document.getElementById('r_class').value.trim(),
+        password:  pw
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAlert(data.message, 'success');
+      document.getElementById('panel-register').querySelector('form').reset();
+      setTimeout(() => switchTab('login'), 2000);
+    } else {
+      showAlert(data.message);
+    }
+  } catch {
+    showAlert('Không thể kết nối server.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-user-plus"></i> Tạo tài khoản';
+  }
+}
+
+// ---- Reset Password ----
+async function doReset(e) {
+  e.preventDefault();
+  hideAlert();
+  const pw  = document.getElementById('f_pw').value;
+  const pw2 = document.getElementById('f_pw2').value;
+  if (pw !== pw2) { showAlert('Mật khẩu xác nhận không khớp.'); return; }
+  if (pw.length < 6) { showAlert('Mật khẩu mới phải có ít nhất 6 ký tự.'); return; }
+
+  const btn = document.getElementById('btnReset');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+  try {
+    const res = await fetch(`${API}/auth/reset-password`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        studentId:   document.getElementById('f_id').value.trim(),
+        email:       document.getElementById('f_email').value.trim(),
+        newPassword: pw
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAlert(data.message, 'success');
+      document.getElementById('panel-forgot').querySelector('form').reset();
+      setTimeout(() => switchTab('login'), 2500);
+    } else {
+      showAlert(data.message);
+    }
+  } catch {
+    showAlert('Không thể kết nối server.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-key"></i> Đặt lại mật khẩu';
+  }
+}
+
+// Nếu đã đăng nhập hợp lệ (có đủ role) thì redirect thẳng vào app
+try {
+  const existing = JSON.parse(localStorage.getItem('eduroom_session') || 'null');
+  if (existing && existing.studentId && existing.role) {
+    window.location.href = '/index.html';
+  } else if (existing) {
+    // Session cũ bị thiếu role → xóa đi, bắt đăng nhập lại
+    localStorage.removeItem('eduroom_session');
+  }
+} catch {
+  localStorage.removeItem('eduroom_session');
+}
+</script>
+</body>
+</html>
