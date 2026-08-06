@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduRoom – Hệ Thống Đặt Phòng Học Nhóm</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="fas fa-building"></i></div>
+      <div class="logo-text">
+        <span class="logo-title">EduRoom</span>
+        <span class="logo-sub" id="sidebarRoleBadge">Nhóm 05</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <!-- Dashboard: cả 2 role đều thấy -->
+      <div class="nav-section-label">Tổng quan</div>
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+      </a>
+
+      <!-- ADMIN: quản lý phòng + sinh viên -->
+      <div class="nav-section-label role-admin" style="display:none">Quản lý (Admin)</div>
+      <a href="#" class="nav-item role-admin" data-page="rooms" style="display:none">
+        <i class="fas fa-door-open"></i><span>Quản lý phòng</span>
+      </a>
+      <a href="#" class="nav-item role-admin" data-page="students" style="display:none">
+        <i class="fas fa-user-graduate"></i><span>Quản lý sinh viên</span>
+      </a>
+      <a href="#" class="nav-item role-admin" data-page="allbookings" style="display:none">
+        <i class="fas fa-list-check"></i><span>Tất cả lịch đặt</span>
+      </a>
+
+      <!-- HOCVIEN: xem phòng + đặt phòng + lịch của mình -->
+      <div class="nav-section-label role-hocvien" style="display:none">Phòng học</div>
+      <a href="#" class="nav-item role-hocvien" data-page="rooms" style="display:none">
+        <i class="fas fa-door-open"></i><span>Xem phòng</span>
+      </a>
+
+      <div class="nav-section-label role-hocvien" style="display:none">Đặt phòng</div>
+      <a href="#" class="nav-item role-hocvien" data-page="book" style="display:none">
+        <i class="fas fa-calendar-plus"></i><span>Đặt phòng</span>
+      </a>
+      <a href="#" class="nav-item role-hocvien" data-page="mybookings" style="display:none">
+        <i class="fas fa-calendar-check"></i><span>Lịch đặt của tôi</span>
+      </a>
+      <a href="#" class="nav-item role-hocvien" data-page="profile" style="display:none">
+        <i class="fas fa-user-pen"></i><span>Thông tin cá nhân</span>
+      </a>
+
+      <!-- Đổi mật khẩu: cả 2 role -->
+      <div class="nav-section-label">Tài khoản</div>
+      <a href="#" class="nav-item" data-page="changepw">
+        <i class="fas fa-key"></i><span>Đổi mật khẩu</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <i class="fas fa-circle-info"></i>
+      <span>HK1 – 2024/2025</span>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main-wrapper">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+      <div class="topbar-title" id="pageTitle">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="btn-icon" title="Làm mới" onclick="loadCurrentPage()">
+          <i class="fas fa-rotate-right"></i>
+        </button>
+
+        <!-- User info dropdown -->
+        <div class="user-dropdown" id="userDropdown">
+          <button class="user-btn" id="userBtn" onclick="toggleUserMenu()">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <div class="user-info-mini">
+              <span class="user-name" id="topbarName">--</span>
+              <span class="user-role-label" id="topbarRole">--</span>
+            </div>
+            <i class="fas fa-chevron-down" style="font-size:11px;color:var(--text-muted)"></i>
+          </button>
+          <div class="user-menu" id="userMenu">
+            <div class="user-menu-header">
+              <div class="user-menu-name" id="menuName">--</div>
+              <div class="user-menu-id" id="menuStudentId">--</div>
+              <span class="role-badge" id="menuRoleBadge">--</span>
+            </div>
+            <div class="user-menu-divider"></div>
+            <button class="user-menu-item" onclick="navigate('changepw'); toggleUserMenu()">
+              <i class="fas fa-key"></i> Đổi mật khẩu
+            </button>
+            <div class="user-menu-divider"></div>
+            <button class="user-menu-item logout-item" onclick="logout()">
+              <i class="fas fa-right-from-bracket"></i> Đăng xuất
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Toast container -->
+    <div id="toastContainer"></div>
+
+    <!-- ===== PAGES ===== -->
+    <main class="content">
+
+      <!-- ======== DASHBOARD ======== -->
+      <div id="page-dashboard" class="page active">
+        <!-- Welcome banner -->
+        <div class="welcome-banner" id="welcomeBanner">
+          <div class="welcome-text">
+            <div class="welcome-greeting" id="welcomeGreeting">Xin chào!</div>
+            <div class="welcome-sub" id="welcomeSub">Chào mừng bạn đến với EduRoom</div>
+          </div>
+          <div class="welcome-icon"><i class="fas fa-building"></i></div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card" style="--accent:#6c63ff">
+            <div class="stat-icon"><i class="fas fa-door-open"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statTotalRooms">--</div>
+              <div class="stat-label">Tổng phòng</div>
+            </div>
+          </div>
+          <div class="stat-card" style="--accent:#43d477">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statActiveRooms">--</div>
+              <div class="stat-label">Phòng hoạt động</div>
+            </div>
+          </div>
+          <div class="stat-card" style="--accent:#f7a641">
+            <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statStudents">--</div>
+              <div class="stat-label">Sinh viên</div>
+            </div>
+          </div>
+          <div class="stat-card" style="--accent:#f45d5d">
+            <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statBookings">--</div>
+              <div class="stat-label" id="statBookingsLabel">Lịch đặt</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fas fa-door-open"></i> Phòng đang hoạt động</h3>
+              <a href="#" class="link-more" data-page="rooms">Xem tất cả</a>
+            </div>
+            <div class="card-body" id="dashRooms"><div class="loader"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fas fa-history"></i> <span id="dashBookingsTitle">Lịch đặt gần đây</span></h3>
+              <a href="#" class="link-more" id="dashBookingsMoreLink" data-page="allbookings">Xem tất cả</a>
+            </div>
+            <div class="card-body" id="dashBookings"><div class="loader"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======== ROOMS (cả 2 role, admin thêm nút quản lý) ======== -->
+      <div id="page-rooms" class="page">
+        <div class="page-toolbar">
+          <div class="filter-group">
+            <button class="btn btn-filter active" data-filter="">Tất cả</button>
+            <button class="btn btn-filter" data-filter="Phòng thường">Thường</button>
+            <button class="btn btn-filter" data-filter="Phòng có máy chiếu">Máy chiếu</button>
+            <button class="btn btn-filter" data-filter="Phòng họp seminar">Seminar</button>
+          </div>
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="roomSearch" placeholder="Tìm phòng..." />
+          </div>
+          <!-- Chỉ admin thấy nút thêm phòng -->
+          <button class="btn btn-primary role-admin" style="display:none" onclick="openAddRoomModal()">
+            <i class="fas fa-plus"></i> Thêm phòng
+          </button>
+        </div>
+        <div class="rooms-grid" id="roomsGrid"><div class="loader big"></div></div>
+      </div>
+
+      <!-- ======== STUDENTS (chỉ ADMIN) ======== -->
+      <div id="page-students" class="page">
+        <div class="page-toolbar">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="studentSearch" placeholder="Tìm sinh viên..." />
+          </div>
+          <button class="btn btn-primary" onclick="openAddStudentModal()">
+            <i class="fas fa-user-plus"></i> Thêm sinh viên
+          </button>
+        </div>
+        <div class="card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Mã SV</th><th>Họ tên</th><th>Lớp</th>
+                <th>Số điện thoại</th><th>Email</th><th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTbody"><tr><td colspan="6"><div class="loader"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======== BOOK (chỉ HOCVIEN) ======== -->
+      <div id="page-book" class="page">
+        <div class="book-layout">
+          <div class="card">
+            <div class="card-header"><h3><i class="fas fa-calendar-plus"></i> Đặt phòng mới</h3></div>
+            <div class="card-body">
+              <form id="bookingForm" class="form-grid" onsubmit="submitBooking(event)">
+                <div class="form-group full">
+                  <label><i class="fas fa-user"></i> Mã sinh viên</label>
+                  <input type="text" id="bk_studentId" placeholder="VD: SV001" required readonly
+                         style="opacity:.7;cursor:not-allowed" />
+                </div>
+                <div class="form-group full">
+                  <label><i class="fas fa-door-open"></i> Chọn phòng</label>
+                  <select id="bk_roomId" required>
+                    <option value="">-- Chọn phòng --</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-clock"></i> Thời gian bắt đầu</label>
+                  <input type="datetime-local" id="bk_startTime" required />
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-clock"></i> Thời gian kết thúc</label>
+                  <input type="datetime-local" id="bk_endTime" required />
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-users"></i> Số người tham gia</label>
+                  <input type="number" id="bk_people" min="1" placeholder="VD: 5" required />
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-pen"></i> Mục đích sử dụng</label>
+                  <input type="text" id="bk_purpose" placeholder="VD: Họp nhóm bài tập lớn" required />
+                </div>
+                <div class="form-group full">
+                  <div id="feePreview" class="fee-preview hidden">
+                    <i class="fas fa-tag"></i><span id="feeText"></span>
+                  </div>
+                </div>
+                <div class="form-group full">
+                  <button type="submit" class="btn btn-primary btn-lg" id="btnSubmitBook">
+                    <i class="fas fa-calendar-plus"></i> Xác nhận đặt phòng
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3><i class="fas fa-circle-info"></i> Lưu ý</h3></div>
+            <div class="card-body">
+              <ul class="rules-list">
+                <li><i class="fas fa-check-circle text-green"></i> Không đặt phòng đang bảo trì</li>
+                <li><i class="fas fa-check-circle text-green"></i> Không trùng lịch với đặt phòng khác</li>
+                <li><i class="fas fa-check-circle text-green"></i> Số người ≤ sức chứa phòng</li>
+                <li><i class="fas fa-check-circle text-green"></i> Tối đa 4 giờ / ngày / sinh viên</li>
+                <li><i class="fas fa-check-circle text-green"></i> Thời gian kết thúc phải sau bắt đầu</li>
+              </ul>
+              <div class="fee-table-wrapper">
+                <h4><i class="fas fa-money-bill-wave"></i> Bảng giá phòng</h4>
+                <table class="fee-table">
+                  <tr><td><i class="fas fa-door-closed"></i> Phòng thường</td><td class="free">Miễn phí</td></tr>
+                  <tr><td><i class="fas fa-video"></i> Phòng máy chiếu</td><td>20.000đ/giờ</td></tr>
+                  <tr><td><i class="fas fa-chalkboard-teacher"></i> Phòng seminar</td><td>50.000đ/giờ</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======== MY BOOKINGS (chỉ HOCVIEN — chỉ thấy lịch của mình) ======== -->
+      <div id="page-mybookings" class="page">
+        <div class="page-toolbar">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="myBookingSearch" placeholder="Tìm theo mã phòng, mục đích..." />
+          </div>
+          <div class="filter-group">
+            <button class="btn btn-filter active" data-mystatus="">Tất cả</button>
+            <button class="btn btn-filter" data-mystatus="Đã đặt">Đã đặt</button>
+            <button class="btn btn-filter" data-mystatus="Đã hủy">Đã hủy</button>
+          </div>
+        </div>
+        <div class="card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Mã đặt</th><th>Phòng</th><th>Thời gian</th>
+                <th>Số người</th><th>Mục đích</th><th>Phí</th><th>Trạng thái</th><th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="myBookingsTbody"><tr><td colspan="8"><div class="loader"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======== ALL BOOKINGS (chỉ ADMIN) ======== -->
+      <div id="page-allbookings" class="page">
+        <div class="page-toolbar">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="bookingSearch" placeholder="Tìm theo mã SV, mã phòng..." />
+          </div>
+          <div class="filter-group">
+            <button class="btn btn-filter active" data-status="">Tất cả</button>
+            <button class="btn btn-filter" data-status="Đã đặt">Đã đặt</button>
+            <button class="btn btn-filter" data-status="Đã hủy">Đã hủy</button>
+          </div>
+        </div>
+        <div class="card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Mã đặt</th><th>Sinh viên</th><th>Phòng</th>
+                <th>Thời gian</th><th>Số người</th>
+                <th>Phí</th><th>Trạng thái</th><th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTbody"><tr><td colspan="8"><div class="loader"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======== PROFILE (HOCVIEN: cập nhật thông tin) ======== -->
+      <div id="page-profile" class="page">
+        <div style="max-width:520px;margin:0 auto">
+          <div class="card">
+            <div class="card-header"><h3><i class="fas fa-user-pen"></i> Thông tin cá nhân</h3></div>
+            <div class="card-body">
+              <form class="form-grid" onsubmit="submitProfile(event)" id="profileForm">
+                <div class="form-group full">
+                  <label><i class="fas fa-id-card"></i> Mã sinh viên</label>
+                  <input type="text" id="pf_id" readonly style="opacity:.6;cursor:not-allowed" />
+                </div>
+                <div class="form-group full">
+                  <label><i class="fas fa-user"></i> Họ và tên</label>
+                  <input type="text" id="pf_name" placeholder="Nhập họ và tên" required />
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-phone"></i> Số điện thoại</label>
+                  <input type="tel" id="pf_phone" placeholder="0912345678" required />
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-envelope"></i> Email</label>
+                  <input type="email" id="pf_email" placeholder="sv@edu.vn" required />
+                </div>
+                <div class="form-group full">
+                  <label><i class="fas fa-chalkboard"></i> Lớp</label>
+                  <input type="text" id="pf_class" placeholder="VD: CNTT01" required />
+                </div>
+                <div class="form-group full">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Lưu thay đổi
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======== CHANGE PASSWORD (cả 2 role) ======== --> -->
+      <div id="page-changepw" class="page">
+        <div style="max-width:480px;margin:0 auto">
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fas fa-key"></i> Đổi mật khẩu</h3>
+            </div>
+            <div class="card-body">
+              <form class="form-grid" onsubmit="submitChangePw(event)" id="changePwForm">
+                <div class="form-group full">
+                  <label><i class="fas fa-lock"></i> Mật khẩu hiện tại</label>
+                  <input type="password" id="cp_old" placeholder="Nhập mật khẩu hiện tại" required />
+                </div>
+                <div class="form-group full">
+                  <label><i class="fas fa-lock"></i> Mật khẩu mới</label>
+                  <input type="password" id="cp_new" placeholder="Tối thiểu 6 ký tự" required />
+                </div>
+                <div class="form-group full">
+                  <label><i class="fas fa-lock"></i> Xác nhận mật khẩu mới</label>
+                  <input type="password" id="cp_new2" placeholder="Nhập lại mật khẩu mới" required />
+                </div>
+                <div class="form-group full">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Lưu mật khẩu mới
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===== MODALS ===== -->
+
+  <!-- Modal thêm phòng (admin) -->
+  <div class="modal-overlay" id="modalAddRoom">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-plus"></i> Thêm phòng mới</h3>
+        <button class="modal-close" onclick="closeModal('modalAddRoom')"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="addRoomForm" class="form-grid" onsubmit="submitAddRoom(event)">
+          <div class="form-group">
+            <label>Mã phòng</label>
+            <input type="text" id="rm_id" placeholder="VD: P008" required />
+          </div>
+          <div class="form-group">
+            <label>Tên phòng</label>
+            <input type="text" id="rm_name" placeholder="VD: Phòng học A1" required />
+          </div>
+          <div class="form-group">
+            <label>Tầng</label>
+            <input type="number" id="rm_floor" min="1" placeholder="VD: 3" required />
+          </div>
+          <div class="form-group">
+            <label>Sức chứa tối đa</label>
+            <input type="number" id="rm_capacity" min="1" placeholder="VD: 20" required />
+          </div>
+          <div class="form-group full">
+            <label>Loại phòng</label>
+            <select id="rm_type" required>
+              <option value="">-- Chọn loại --</option>
+              <option value="Phòng thường">Phòng thường</option>
+              <option value="Phòng có máy chiếu">Phòng có máy chiếu</option>
+              <option value="Phòng họp seminar">Phòng họp seminar</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="fas fa-save"></i> Lưu phòng
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal đổi trạng thái phòng (admin) -->
+  <div class="modal-overlay" id="modalRoomStatus">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3><i class="fas fa-toggle-on"></i> Cập nhật trạng thái</h3>
+        <button class="modal-close" onclick="closeModal('modalRoomStatus')"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-confirm-text">Phòng: <strong id="statusRoomId"></strong></p>
+        <div class="form-group" style="margin-top:12px">
+          <label>Trạng thái mới</label>
+          <select id="newRoomStatus">
+            <option value="Đang hoạt động">Đang hoạt động</option>
+            <option value="Đang bảo trì">Đang bảo trì</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeModal('modalRoomStatus')">Hủy</button>
+          <button class="btn btn-primary" onclick="confirmUpdateStatus()">
+            <i class="fas fa-save"></i> Lưu
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal thêm sinh viên (admin) -->
+  <div class="modal-overlay" id="modalAddStudent">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus"></i> Thêm sinh viên mới</h3>
+        <button class="modal-close" onclick="closeModal('modalAddStudent')"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="addStudentForm" class="form-grid" onsubmit="submitAddStudent(event)">
+          <div class="form-group">
+            <label>Mã sinh viên</label>
+            <input type="text" id="sv_id" placeholder="VD: SV006" required />
+          </div>
+          <div class="form-group">
+            <label>Họ và tên</label>
+            <input type="text" id="sv_name" placeholder="Nguyễn Văn A" required />
+          </div>
+          <div class="form-group">
+            <label>Số điện thoại</label>
+            <input type="tel" id="sv_phone" placeholder="0912345678" required />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="sv_email" placeholder="sv@edu.vn" required />
+          </div>
+          <div class="form-group full">
+            <label>Lớp</label>
+            <input type="text" id="sv_class" placeholder="VD: CNTT01" required />
+          </div>
+          <div class="form-group full">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="fas fa-save"></i> Lưu sinh viên
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal hủy đặt phòng -->
+  <div class="modal-overlay" id="modalCancel">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3><i class="fas fa-trash-can"></i> Hủy lịch đặt phòng</h3>
+        <button class="modal-close" onclick="closeModal('modalCancel')"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-confirm-text">Hủy lịch đặt <strong id="cancelBookingId"></strong>?<br>
+          <span style="color:var(--red);font-size:12px">Hành động này không thể hoàn tác.</span>
+        </p>
+        <div id="cancelStudentRow" class="form-group">
+          <label><i class="fas fa-user"></i> Mã sinh viên xác nhận</label>
+          <input type="text" id="cancelStudentId" placeholder="Nhập mã SV để xác nhận" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeModal('modalCancel')">Không</button>
+          <button class="btn btn-danger" onclick="confirmCancel()">
+            <i class="fas fa-trash-can"></i> Xác nhận hủy
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal xem chi tiết booking -->
+  <div class="modal-overlay" id="modalDetail">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-circle-info"></i> Chi tiết lịch đặt</h3>
+        <button class="modal-close" onclick="closeModal('modalDetail')"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="modalDetailBody"></div>
+    </div>
+  </div>
+
+  <!-- Modal xem lịch trống phòng -->
+  <div class="modal-overlay" id="modalSchedule">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-calendar-days"></i> Lịch trống – <span id="scheduleRoomName"></span></h3>
+        <button class="modal-close" onclick="closeModal('modalSchedule')"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="scheduleBody"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
