@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Class Diagram – Nhóm 05</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#0f0f1a; font-family:'Segoe UI',sans-serif; padding:20px; }
+h1 { text-align:center; color:#e2e8f0; font-size:20px; margin-bottom:4px; }
+h2 { text-align:center; color:#90a4ae; font-size:12px; margin-bottom:16px; }
+svg { display:block; margin:0 auto; }
+.tip { text-align:center; color:#546e7a; font-size:11px; margin-top:10px; }
+</style>
+</head>
+<body>
+<h1>CLASS DIAGRAM – Hệ Thống Quản Lý Đặt Phòng Học Nhóm – Nhóm 05</h1>
+<h2>Môn: Lập Trình Hướng Đối Tượng &nbsp;|&nbsp; Java OOP + HttpServer + HTML/CSS/JS</h2>
+
+<svg id="diagram" xmlns="http://www.w3.org/2000/svg"
+     width="1800" height="1400"
+     style="background:#0f0f1a;border-radius:12px">
+
+<defs>
+  <!-- Arrow markers -->
+  <marker id="arrowInherit" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="none" stroke="#5b9bd5" stroke-width="1.5"/>
+  </marker>
+  <marker id="arrowImpl" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="none" stroke="#ab7ddc" stroke-width="1.5"/>
+  </marker>
+  <marker id="arrowAssoc" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#80cbc4" stroke="#80cbc4" stroke-width="1"/>
+  </marker>
+  <marker id="arrowDep" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#ffb74d" stroke="#ffb74d" stroke-width="1"/>
+  </marker>
+</defs>
+
+<script type="text/javascript">
+// We'll draw everything via JS after SVG loads
+</script>
+</svg>
+
+<div class="tip">💡 Nhấn Ctrl+Scroll để zoom | Kéo chuột để pan | Ctrl+P → Save as PDF</div>
+
+<script>
+const svg = document.getElementById('diagram');
+const NS = 'http://www.w3.org/2000/svg';
+
+// ═══════════════════════════════════════
+// THEME COLORS
+// ═══════════════════════════════════════
+const T = {
+  abstract:  { hdr:'#1a4a8a', border:'#5b9bd5', text:'#cce5ff', body:'#0d1e38' },
+  concrete:  { hdr:'#1b5e40', border:'#4caf82', text:'#ccffee', body:'#0a1f14' },
+  interface: { hdr:'#4a1a7a', border:'#ab7ddc', text:'#eedcff', body:'#1a0a2e' },
+  service:   { hdr:'#8b0000', border:'#ef5350', text:'#ffcccc', body:'#2a0000' },
+  repo:      { hdr:'#7a3500', border:'#ff8a65', text:'#ffe8cc', body:'#2a1200' },
+  value:     { hdr:'#004d40', border:'#4db6ac', text:'#ccffff', body:'#001a15' },
+};
+
+// ═══════════════════════════════════════
+// DRAW FUNCTIONS
+// ═══════════════════════════════════════
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+function text(x, y, content, attrs, parent) {
+  const t = el('text', {x, y, ...attrs}, parent);
+  t.textContent = content;
+  return t;
+}
+
+// Draw a class box. Returns anchor points.
+function drawClass(x, y, w, theme, stereotype, name, isAbstract, sections) {
+  const g = el('g', {}, svg);
+  const t = T[theme];
+  const FS = 12;        // font size
+  const ROW = 18;       // row height
+  const HDR_H = stereotype ? 54 : 38;
+  const DIVH  = 6;      // divider gap
+  const PAD   = 10;
+
+  // Calculate total height
+  let h = HDR_H;
+  for (const sec of sections) {
+    h += DIVH + sec.length * ROW + 4;
+  }
+  h += 6;
+
+  // Shadow
+  el('rect', {x:x+4, y:y+4, width:w, height:h, rx:8,
+    fill:'#00000066'}, g);
+
+  // Body
+  el('rect', {x, y, width:w, height:h, rx:8,
+    fill:t.body, stroke:t.border, 'stroke-width':2.5}, g);
+
+  // Header
+  el('rect', {x:x+2, y:y+2, width:w-4, height:HDR_H-2, rx:6,
+    fill:t.hdr}, g);
+
+  // Stereotype
+  if (stereotype) {
+    text(x+w/2, y+18, `«${stereotype}»`, {
+      'text-anchor':'middle', 'font-size':10,
+      fill:'rgba(255,255,255,0.75)', 'font-style':'italic',
+      'font-family':'Segoe UI,sans-serif'
+    }, g);
+  }
+
+  // Class name
+  const nameY = stereotype ? y+38 : y+26;
+  text(x+w/2, nameY, name, {
+    'text-anchor':'middle',
+    'font-size':14, 'font-weight':'bold',
+    'font-style': isAbstract ? 'italic' : 'normal',
+    fill:'white', 'font-family':'Segoe UI,sans-serif'
+  }, g);
+
+  // Sections
+  let cy = y + HDR_H;
+  for (let si = 0; si < sections.length; si++) {
+    const sec = sections[si];
+    // Divider line
+    el('line', {x1:x+6, y1:cy+DIVH/2, x2:x+w-6, y2:cy+DIVH/2,
+      stroke:t.border, 'stroke-width':1, 'stroke-dasharray': si>0?'4,3':''}, g);
+    cy += DIVH;
+
+    for (const row of sec) {
+      const color = row.startsWith('-') ? '#80cbc4'
+                  : row.startsWith('+') ? '#ce93d8'
+                  : row.startsWith('#') ? '#ffb74d'
+                  : '#e0e0e0';
+      text(x+PAD, cy+14, row, {
+        'font-size':11, fill:color,
+        'font-family':'Consolas,monospace'
+      }, g);
+      cy += ROW;
+    }
+    cy += 4;
+  }
+
+  // Return anchor points
+  return {
+    top:    [x+w/2,  y],
+    bot:    [x+w/2,  y+h],
+    left:   [x,      y+h/2],
+    right:  [x+w,    y+h/2],
+    topL:   [x,      y],
+    topR:   [x+w,    y],
+    botL:   [x,      y+h],
+    botR:   [x+w,    y+h],
+    cx:     x+w/2,
+    cy:     y+h/2,
+    h:      h,
+    x, y, w
+  };
+}
+
+// Draw arrow
+function arrow(p1, p2, style, label='', bend=0) {
+  const [x1,y1] = p1, [x2,y2] = p2;
+  const marker = style==='inherit'?'arrowInherit':style==='impl'?'arrowImpl':style==='assoc'?'arrowAssoc':'arrowDep';
+  const color   = style==='inherit'?'#5b9bd5':style==='impl'?'#ab7ddc':style==='assoc'?'#80cbc4':'#ffb74d';
+  const dash    = style==='impl'?'8,5':style==='dep'?'5,4':'none';
+
+  let d;
+  if (bend !== 0) {
+    const mx = (x1+x2)/2 + bend;
+    const my = (y1+y2)/2;
+    d = `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
+    el('path', {d, fill:'none', stroke:color, 'stroke-width':2,
+      'stroke-dasharray':dash, 'marker-end':`url(#${marker})`}, svg);
+  } else {
+    el('line', {x1, y1, x2, y2, stroke:color, 'stroke-width':2,
+      'stroke-dasharray':dash, 'marker-end':`url(#${marker})`}, svg);
+  }
+
+  if (label) {
+    const lx = (x1+x2)/2 + (bend||0)*0.3;
+    const ly = (y1+y2)/2;
+    el('rect', {x:lx-30, y:ly-9, width:60, height:16, rx:3,
+      fill:'#0f0f1a', opacity:0.85}, svg);
+    text(lx, ly+4, label, {
+      'text-anchor':'middle', 'font-size':10,
+      fill:color, 'font-family':'Segoe UI,sans-serif'
+    }, svg);
+  }
+}
+
+// Legend box label on arrow start
+function arrowNote(p, txt, color) {
+  const [x,y] = p;
+  el('rect',{x:x-28,y:y-9,width:56,height:16,rx:3,fill:'#0f0f1a',opacity:.9}, svg);
+  text(x, y+4, txt, {'text-anchor':'middle','font-size':9.5,fill:color,'font-family':'Segoe UI,sans-serif'}, svg);
+}
+
+// ═══════════════════════════════════════
+// LAYOUT — Column positions
+// ═══════════════════════════════════════
+const CW = 230; // class width
+const C1=20, C2=280, C3=540, C4=800, C5=1060, C6=1320, C7=1570;
+
+// ─── ROW 1: Abstract base classes ───────────────────────────────────
+const User = drawClass(C1, 30, CW, 'abstract', 'abstract', 'User', true, [
+  ['-fullName : String', '-phone : String', '-email : String'],
+  ['+getFullName() : String', '+getPhone() : String',
+   '+getEmail() : String', '+getRole() : String  {abstract}']
+]);
+
+const Room = drawClass(C3, 30, CW, 'abstract', 'abstract', 'Room', true, [
+  ['-roomId : String', '-roomName : String', '-floor : int',
+   '-maxCapacity : int', '-status : String'],
+  ['+getRoomId() : String', '+getStatus() : String',
+   '+getRoomType() : String  {abstract}',
+   '+getFeePolicy() : RoomFeePolicy  {abstract}']
+]);
+
+const Bookable = drawClass(C5, 30, CW, 'interface', 'interface', 'Bookable', false, [
+  ['+book(ts: TimeSlot) : boolean',
+   '+cancel() : boolean',
+   '+isAvailable(ts) : boolean']
+]);
+
+const RoomFeePolicy = drawClass(C6, 30, CW, 'interface', 'interface', 'RoomFeePolicy', false, [
+  ['+calculateFee(hours: double) : double',
+   '+getFeeDescription() : String']
+]);
+
+const BookingValidator = drawClass(C7, 30, CW, 'interface', 'interface', 'BookingValidator', false, [
+  ['+validate(studentId: String,',
+   '  roomId: String,',
+   '  timeSlot: TimeSlot,',
+   '  numPeople: int) : void',
+   '// @FunctionalInterface (lambda)']
+]);
+
+// ─── ROW 2: Concrete model classes ───────────────────────────────────
+const Student = drawClass(C1, 310, CW, 'concrete', null, 'Student', false, [
+  ['-studentId : String', '-className : String'],
+  ['+getStudentId() : String', '+getClassName() : String', '+getRole() : String']
+]);
+
+const Account = drawClass(C2, 310, CW, 'concrete', null, 'Account', false, [
+  ['-studentId : String', '-passwordHash : String',
+   '-email : String', '-role : String'],
+  ['+isAdmin() : boolean', '+isHocVien() : boolean',
+   '+toCsvString() : String']
+]);
+
+const NormalRoom = drawClass(C3, 310, CW, 'concrete', null, 'NormalRoom', false, [
+  ['#TYPE = "Phòng thường"'],
+  ['+getRoomType() : String', '+getFeePolicy() : FreeRoomFeePolicy']
+]);
+
+const ProjectorRoom = drawClass(C4, 310, CW, 'concrete', null, 'ProjectorRoom', false, [
+  ['#TYPE = "Phòng có máy chiếu"'],
+  ['+getRoomType() : String', '+getFeePolicy() : ProjectorRoomFeePolicy']
+]);
+
+const SeminarRoom = drawClass(C5, 310, CW, 'concrete', null, 'SeminarRoom', false, [
+  ['#TYPE = "Phòng họp seminar"'],
+  ['+getRoomType() : String', '+getFeePolicy() : SeminarRoomFeePolicy']
+]);
+
+const FreeRP = drawClass(C6, 310, CW, 'concrete', null, 'FreeRoomFeePolicy', false, [
+  ['-FEE_PER_HOUR = 0'],
+  ['+calculateFee(h) : 0', '+getFeeDescription() : String']
+]);
+
+const ProjRP = drawClass(C7, 310, CW, 'concrete', null, 'ProjectorRoomFeePolicy', false, [
+  ['-FEE_PER_HOUR = 20000'],
+  ['+calculateFee(h) : h×20000', '+getFeeDescription() : String']
+]);
+
+// ─── ROW 2b: SeminarRoomFeePolicy separate ───────────────────────────
+const SemRP = drawClass(C7, 530, CW, 'concrete', null, 'SeminarRoomFeePolicy', false, [
+  ['-FEE_PER_HOUR = 50000'],
+  ['+calculateFee(h) : h×50000', '+getFeeDescription() : String']
+]);
+
+// ─── ROW 3: Value objects ─────────────────────────────────────────────
+const TimeSlot = drawClass(C1, 570, CW, 'value', null, 'TimeSlot', false, [
+  ['-startTime : LocalDateTime', '-endTime : LocalDateTime'],
+  ['+getDurationHours() : double',
+   '+overlapsWith(ts) : boolean', '+conflictsWith(ts) : boolean']
+]);
+
+const Booking = drawClass(C2, 570, CW+20, 'value', null, 'Booking', false, [
+  ['-bookingId : String', '-studentId : String', '-roomId : String',
+   '-timeSlot : TimeSlot', '-numberOfPeople : int',
+   '-purpose : String', '-status : String', '-fee : double'],
+  ['+getBookingId() : String', '+getStatus() : String', '+getFee() : double']
+]);
+
+const BookingDetail = drawClass(C4, 570, CW, 'value', null, 'BookingDetail', false, [
+  ['-booking : Booking', '-student : Student', '-room : Room'],
+  ['+getBooking() : Booking', '+getStudent() : Student', '+getRoom() : Room']
+]);
+
+// ─── ROW 4: Services ─────────────────────────────────────────────────
+const BookingService = drawClass(C1, 920, CW+20, 'service', null, 'BookingService', false, [
+  ['-bookingRepo : BookingRepository',
+   '-roomService : RoomService',
+   '-studentService : StudentService',
+   '-validators : List<BookingValidator>'],
+  ['+createBooking(...) : Booking',
+   '+cancelBooking(id, studentId) : void',
+   '+getAllBookings() : List<Booking>',
+   '+getBookingsByStudent(id) : List',
+   '+getBookingDetail(id) : BookingDetail']
+]);
+
+const RoomService = drawClass(C3, 920, CW, 'service', null, 'RoomService', false, [
+  ['-roomRepo : RoomRepository'],
+  ['+getAllRooms() : List<Room>',
+   '+getActiveRooms() : List<Room>',
+   '+getRoomById(id) : Room',
+   '+addRoom(room) : void',
+   '+updateRoomStatus(id,s) : void']
+]);
+
+const StudentService = drawClass(C5, 920, CW, 'service', null, 'StudentService', false, [
+  ['-studentRepo : StudentRepository'],
+  ['+getAllStudents() : List',
+   '+getStudentById(id) : Student',
+   '+addStudent(s) : void',
+   '+updateStudent(s) : void']
+]);
+
+const AuthService = drawClass(C6, 920, CW, 'service', null, 'AuthService', false, [
+  ['-accountRepo : AccountRepository',
+   '-studentRepo : StudentRepository'],
+  ['+login(id, pw) : Account',
+   '+register(...) : Account',
+   '+resetPassword(...) : void',
+   '+changePassword(...) : void']
+]);
+
+// ─── ROW 5: Repositories ─────────────────────────────────────────────
+const BookingRepo = drawClass(C1, 1230, CW, 'repo', null, 'BookingRepository', false, [
+  ['-filePath : String', '-cache : Map<String,Booking>'],
+  ['+findAll() : List<Booking>',
+   '+findByStudentId(id) : List',
+   '+findByRoomId(id) : List', '+save(b) : void']
+]);
+
+const RoomRepo = drawClass(C3, 1230, CW, 'repo', null, 'RoomRepository', false, [
+  ['-filePath : String', '-cache : Map<String,Room>'],
+  ['+findAll() : List<Room>',
+   '+findById(id) : Optional<Room>',
+   '+save(r) : void', '+existsById(id) : boolean']
+]);
+
+const StudentRepo = drawClass(C5, 1230, CW, 'repo', null, 'StudentRepository', false, [
+  ['-filePath : String', '-cache : Map<String,Student>'],
+  ['+findAll() : List<Student>',
+   '+findById(id) : Optional',
+   '+save(s) : void', '+existsById(id) : boolean']
+]);
+
+const AccountRepo = drawClass(C6, 1230, CW, 'repo', null, 'AccountRepository', false, [
+  ['-filePath : String', '-cache : Map<String,Account>'],
+  ['+findByStudentId(id) : Optional',
+   '+existsByStudentId(id) : boolean',
+   '+save(acc) : void', '+findAll() : List']
+]);
+
+// ═══════════════════════════════════════
+// ARROWS
+// ═══════════════════════════════════════
+
+// ── Inheritance ──
+arrow(Student.top, User.bot, 'inherit', 'extends');
+arrow(NormalRoom.top,    Room.bot, 'inherit', 'extends', -20);
+arrow(ProjectorRoom.top, [Room.cx, Room.bot[1]], 'inherit', 'extends', 20);
+arrow(SeminarRoom.top,   [Room.cx+20, Room.bot[1]], 'inherit', 'extends', 60);
+
+// ── Implements ──
+arrow(Room.right, Bookable.left, 'impl', 'implements');
+arrow(FreeRP.top,  RoomFeePolicy.bot,  'impl', 'implements', -30);
+arrow(ProjRP.top,  [RoomFeePolicy.cx, RoomFeePolicy.bot[1]], 'impl', 'implements');
+arrow(SemRP.top,   [RoomFeePolicy.cx+20, RoomFeePolicy.bot[1]], 'impl', 'implements', 20);
+
+// ── Association ──
+arrow(Booking.left,  [TimeSlot.right[0], Booking.cy], 'assoc', 'has timeSlot');
+arrow(BookingDetail.left, [Booking.right[0], BookingDetail.cy], 'assoc', 'booking');
+arrow([BookingDetail.x, BookingDetail.cy], [Student.right[0], BookingDetail.cy], 'assoc', 'student', -60);
+arrow(BookingDetail.top, [Room.cx, BookingDetail.y], 'assoc', 'room', 80);
+
+// ── Dependency: Service → Validator ──
+arrow([BookingService.right[0], BookingService.y+40], BookingValidator.bot, 'dep', 'uses(λ)', 60);
+
+// ── Dependency: Service → Repository ──
+arrow(BookingService.bot, BookingRepo.top, 'dep', 'uses');
+arrow(RoomService.bot,    RoomRepo.top,    'dep', 'uses');
+arrow(StudentService.bot, StudentRepo.top, 'dep', 'uses');
+arrow(AuthService.bot,    AccountRepo.top, 'dep', 'uses');
+
+// ── Room uses RoomFeePolicy ──
+arrow([Room.right[0], Room.y+60], RoomFeePolicy.left, 'dep', 'getFeePolicy');
+
+// ═══════════════════════════════════════
+// SECTION LABELS
+// ═══════════════════════════════════════
+function sectionLabel(x, y, txt) {
+  el('rect',{x,y,width:380,height:24,rx:5,fill:'#1a1a3a',stroke:'#3a3a6a','stroke-width':1}, svg);
+  text(x+12, y+16, txt, {'font-size':13,'font-weight':'bold',fill:'#6c63ff','font-family':'Segoe UI,sans-serif'}, svg);
+}
+sectionLabel(10, 4,   '① ABSTRACT BASE CLASSES – User (abstract), Room (abstract)');
+sectionLabel(10, 282, '② CONCRETE MODEL – Student, Account, NormalRoom, ProjectorRoom, SeminarRoom + Fee Policies');
+sectionLabel(10, 542, '③ VALUE OBJECTS – TimeSlot, Booking, BookingDetail');
+sectionLabel(10, 893, '④ SERVICE LAYER – BookingService, RoomService, StudentService, AuthService');
+sectionLabel(10, 1203,'⑤ REPOSITORY LAYER – File I/O CSV (BookingRepo, RoomRepo, StudentRepo, AccountRepo)');
+
+// ── LEGEND ──
+const lx = 1320, ly = 780;
+el('rect',{x:lx,y:ly,width:460,height:200,rx:8,fill:'#1a1a2e',stroke:'#3a3a5a','stroke-width':1.5}, svg);
+text(lx+14, ly+22, 'CHÚ THÍCH QUAN HỆ', {'font-size':13,'font-weight':'bold',fill:'white','font-family':'Segoe UI,sans-serif'}, svg);
+
+const legends = [
+  ['#5b9bd5','8,0','Inheritance (extends) ──▶'],
+  ['#ab7ddc','8,5','Realization (implements) - -▶'],
+  ['#80cbc4','8,0','Association (has-a) ──▷'],
+  ['#ffb74d','5,4','Dependency (uses) ····▶'],
+];
+legends.forEach(([c,dash,lbl],i) => {
+  const ly2 = ly+50+i*38;
+  el('line',{x1:lx+14,y1:ly2,x2:lx+80,y2:ly2,stroke:c,'stroke-width':2.5,'stroke-dasharray':dash}, svg);
+  el('polygon',{points:`${lx+72},${ly2-5} ${lx+86},${ly2} ${lx+72},${ly2+5}`,fill:c.includes('80')||c.includes('ff')?c:'none',stroke:c,'stroke-width':1.5}, svg);
+  text(lx+96, ly2+5, lbl, {'font-size':12,fill:c,'font-family':'Segoe UI,sans-serif'}, svg);
+});
+
+const colLeg = [
+  ['#1a4a8a','#5b9bd5','Abstract Class'],
+  ['#1b5e40','#4caf82','Concrete Class'],
+  ['#4a1a7a','#ab7ddc','Interface'],
+  ['#8b0000','#ef5350','Service'],
+  ['#7a3500','#ff8a65','Repository'],
+  ['#004d40','#4db6ac','Value Object'],
+];
+text(lx+14, ly+180, 'Màu sắc:', {'font-size':11,fill:'#90a4ae','font-family':'Segoe UI,sans-serif'}, svg);
+colLeg.forEach(([bg,bd,lbl],i) => {
+  const cx = lx+80+i*62;
+  el('rect',{x:cx,y:ly+168,width:14,height:14,rx:2,fill:bg,stroke:bd,'stroke-width':2}, svg);
+  text(cx+18, ly+179, lbl.split(' ')[0], {'font-size':9,fill:'#cfd8dc','font-family':'Segoe UI,sans-serif'}, svg);
+});
+
+// Resize SVG to fit
+const maxH = Math.max(SemRP.bot[1], AccountRepo.bot[1]) + 40;
+svg.setAttribute('height', maxH + 30);
+
+</script>
+</body>
+</html>
